@@ -20,7 +20,11 @@ server.get('/api/users', (req, res) => {
 //GET by ID
 server.get('/api/users/:id', (req, res) => {
     Users.findById(req.params.id).then(user => {
+        if(!user){
+            res.status(404).json({errorMessage: 'The user with the specified ID does not exist.'})
+        } else {
         res.status(200).json(user)
+        }
     }).catch( err => {
         console.log("unable to find a user with that id number", err)
         res.status(500).json({errorMessage: 'The get request failed'})
@@ -32,7 +36,11 @@ server.post('/api/users', (req, res) => {
     const userInfo = req.body
     console.log("this is the request body", req.body);
     Users.insert(userInfo).then(user => {
+        if(req.body.name && req.body.bio){
         res.status(201).json(user);
+        } else{
+            res.status(400).json({errorMessage: 'Please provide name and bio for the user'})
+        }
     }).catch(err => {
         console.log("The post request was unsuccessful", err)
         res.status(500).json({ errorMessage: 'The post request was unsuccessful'})
@@ -42,7 +50,11 @@ server.post('/api/users', (req, res) => {
 //Delete request
 server.delete('/api/users/:id', (req,res) => {
     Users.remove(req.params.id).then(removed => {
+        if(!user){
+            res.status(404).json({errorMessage: 'The user with the specified ID does not exist.'})
+        }else{
         res.status(200).json(removed)
+        }
     }).catch(err => {
         console.log(err);
         res.status(500).json({ errorMessage: 'Deletion unsuccessful'})
@@ -52,10 +64,17 @@ server.delete('/api/users/:id', (req,res) => {
 //Put request
 server.put('/api/users/:id', (req, res) => {
     Users.update(req.params.id, req.body).then(count => {
+        if(!user){
+            res.status(404).json({errorMessage: 'The user with the specified ID does not exist.'})
+        } else if (!res.body.name || !res.body.bio) {
+            res.status(400).json({errorMessage: 'Please provide name and bio for the user'})
+        }
+        else{
         res.status(200).json(count)
+        }
     }).catch(err => {
         console.log(err);
-        res.status(500).json({ errorMessage: 'Update failed due to an error'})
+        res.status(500).json({ errorMessage: 'The users information could not be updated'})
     })
 })
 
