@@ -1,11 +1,12 @@
 // implement your API here
 const express = require('express');
 const Users = require('./data/db.js');
-
+const cors = require('cors')
 const server = express();
 
 //Using middleware
 server.use(express.json());
+server.use(cors());
 
 //Get request
 server.get('/api/users', (req, res) => {
@@ -50,11 +51,7 @@ server.post('/api/users', (req, res) => {
 //Delete request
 server.delete('/api/users/:id', (req,res) => {
     Users.remove(req.params.id).then(removed => {
-        if(!user){
-            res.status(404).json({errorMessage: 'The user with the specified ID does not exist.'})
-        }else{
         res.status(200).json(removed)
-        }
     }).catch(err => {
         console.log(err);
         res.status(500).json({ errorMessage: 'Deletion unsuccessful'})
@@ -64,9 +61,9 @@ server.delete('/api/users/:id', (req,res) => {
 //Put request
 server.put('/api/users/:id', (req, res) => {
     Users.update(req.params.id, req.body).then(count => {
-        if(!user){
-            res.status(404).json({errorMessage: 'The user with the specified ID does not exist.'})
-        } else if (!res.body.name || !res.body.bio) {
+        if(count == 0){
+            res.status(404).json({errorMessage: 'The id was not found'})
+        } else if (!req.body.name || !req.body.bio) {
             res.status(400).json({errorMessage: 'Please provide name and bio for the user'})
         }
         else{
